@@ -92,11 +92,11 @@ validationButton.addEventListener("click", async () => {
     try {
       const numberOfDays = parseInt(daysRange.value);
       const options = {
-        showLat: document.getElementById("showLat").checked,
-        showLon: document.getElementById("showLon").checked,
-        showRain: document.getElementById("showRain").checked,
-        showWind: document.getElementById("showWind").checked,
-        showWindDir: document.getElementById("showWindDir").checked,
+        showLat: document.getElementById("Latitude").checked,
+        showLon: document.getElementById("Longitude").checked,
+        showRain: document.getElementById("Cumul de pluie").checked,
+        showWind: document.getElementById("Vent moyen").checked,
+        showWindDir: document.getElementById("Direction du vent").checked,
       };
       const data = await fetchMeteoByCommune(selectedCommune, numberOfDays);
       createCard(data, options);
