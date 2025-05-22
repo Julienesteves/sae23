@@ -1,102 +1,111 @@
 function createCard(data, options = {}) {
-  // Nettoyer la section avant d'ajouter de nouveaux éléments
-  let weatherSection = document.getElementById("weatherInformation");
-  let requestSection = document.getElementById("cityForm");
+  const weatherSection = document.getElementById("weatherInformation");
+  const requestSection = document.getElementById("cityForm");
   weatherSection.innerHTML = "";
 
-  // Créer un conteneur principal
   const weatherContainer = document.createElement("div");
-  weatherContainer.classList.add("weather-container");
+  weatherContainer.classList.add("force-white", "weather-container");
 
-  // Parcourir tous les jours de prévision
   data.forecasts.forEach((forecast, index) => {
-    // Créer une carte pour chaque jour
+    const code = forecast.weather;
+
     const dayCard = document.createElement("div");
-    dayCard.classList.add("day-card");
+    dayCard.classList.add("weather-card");
 
-    // Ajouter le titre du jour
-    const dayTitle = document.createElement("h3");
-    dayTitle.textContent = `Jour ${index + 1}`;
-    dayCard.appendChild(dayTitle);
+    // Colonne gauche : icône météo + jour
+    const leftCol = createLeftCol(code, index);
 
-    // Créer les éléments de données météo (comme dans votre version originale)
-    let weatherTmin = document.createElement("p");
-    let weatherTmax = document.createElement("p");
-    let weatherPrain = document.createElement("p");
-    let weatherSunHours = document.createElement("p");
+    // Colonne droite : données météo
+    const rightCol = createRightCol(forecast, data.city, options);
 
-    weatherTmin.textContent = `Température minimale : ${forecast.tmin}°C`;
-    weatherTmax.textContent = `Température maximale : ${forecast.tmax}°C`;
-    weatherPrain.textContent = `Probabilité de pluie : ${forecast.probarain}%`;
-    weatherSunHours.textContent = `Ensoleillement : ${displayHours(forecast.sun_hours)}`;
-
-    // Ajouter les éléments à la carte du jour
-    dayCard.appendChild(weatherTmin);
-    dayCard.appendChild(weatherTmax);
-    dayCard.appendChild(weatherPrain);
-    dayCard.appendChild(weatherSunHours);
-
-    // Ajouter les options supplémentaires si cochées
-    if (options.rain) {
-      let weatherRain = document.createElement("p");
-      weatherRain.textContent = `Cumul de pluie : ${forecast.rr10} mm`;
-      dayCard.appendChild(weatherRain);
-    }
-
-    if (options.wind) {
-      let weatherWind = document.createElement("p");
-      weatherWind.textContent = `Vent moyen : ${forecast.wind10m} km/h`;
-      dayCard.appendChild(weatherWind);
-    }
-
-    if (options.windDirection) {
-      let weatherWindDir = document.createElement("p");
-      weatherWindDir.textContent = `Direction du vent : ${forecast.dirwind10m}°`;
-      dayCard.appendChild(weatherWindDir);
-    }
-
-    // Ajouter la carte du jour au conteneur principal
+    dayCard.append(leftCol, rightCol);
     weatherContainer.appendChild(dayCard);
   });
 
-  // Ajouter les coordonnées si demandées
-  if (options.latitude || options.longitude) {
-    const coordsDiv = document.createElement("div");
-    coordsDiv.classList.add("coordinates");
-    
-    if (options.latitude) {
-      let lat = document.createElement("p");
-      lat.textContent = `Latitude : ${data.city.latitude}`;
-      coordsDiv.appendChild(lat);
-    }
-    
-    if (options.longitude) {
-      let lon = document.createElement("p");
-      lon.textContent = `Longitude : ${data.city.longitude}`;
-      coordsDiv.appendChild(lon);
-    }
-    
-    weatherContainer.appendChild(coordsDiv);
-  }
-
-  // Ajouter le conteneur principal à la section
   weatherSection.appendChild(weatherContainer);
-
-  // Bouton de nouvelle recherche (comme dans votre version originale)
-  let reloadButton = document.createElement("button");
-  reloadButton.textContent = "Nouvelle recherche";
-  reloadButton.classList.add("reloadButton");
-  weatherSection.appendChild(reloadButton);
+  addReloadButton(weatherSection);
   
-  reloadButton.addEventListener("click", function() {
-    location.reload();
-  });
-
-  // Gérer la visibilité des sections
   requestSection.style.display = "none";
-  weatherSection.style.display = "flex";
+  weatherSection.style.display = "block";
 }
 
-function displayHours(sunHours) {
-  return sunHours + (sunHours > 1 ? " heures" : " heure");
-} 
+function createLeftCol(code, index) {
+  const leftCol = document.createElement("div");
+  leftCol.classList.add("card-left");
+
+  const icon = document.createElement("img");
+  icon.src = getWeatherImage(code);
+  icon.alt = "Météo";
+  icon.classList.add("weather-icon");
+
+  const day = document.createElement("p");
+  day.classList.add("weather-day");
+  day.textContent = `Jour ${index + 1}`;
+
+  leftCol.append(icon, day);
+  return leftCol;
+}
+
+function createRightCol(forecast, city, options) {
+  const rightCol = document.createElement("div");
+  rightCol.classList.add("card-right");
+
+  const infoList = [
+    { label: "Température min", value: `${forecast.tmin}°C` },
+    { label: "Température max", value: `${forecast.tmax}°C` },
+    { label: "Pluie (%)", value: `${forecast.probarain}%` },
+    { label: "Ensoleillement", value: displayHours(forecast.sun_hours) },
+  ];
+
+  if (options.rain) infoList.push({ label: "Cumul de pluie", value: `${forecast.rr10} mm` });
+  if (options.wind) infoList.push({ label: "Vent moyen", value: `${forecast.wind10m} km/h` });
+  if (options.windDirection) infoList.push({ label: "Direction vent", value: `${forecast.dirwind10m}°` });
+  if (options.latitude) infoList.push({ label: "Latitude", value: city.latitude });
+  if (options.longitude) infoList.push({ label: "Longitude", value: city.longitude });
+
+  infoList.forEach(({ label, value }) => {
+    const line = document.createElement("div");
+    line.classList.add("weather-info-line");
+
+    const spanLabel = document.createElement("span");
+    spanLabel.classList.add("weather-label");
+    spanLabel.textContent = `${label} :`;
+
+    const spanValue = document.createElement("span");
+    spanValue.classList.add("weather-value");
+    spanValue.textContent = value;
+
+    line.append(spanLabel, spanValue);
+    rightCol.appendChild(line);
+  });
+
+  return rightCol;
+}
+
+function addReloadButton(container) {
+  const reloadButton = document.createElement("button");
+  reloadButton.textContent = "Nouvelle recherche";
+  reloadButton.classList.add("reloadButton");
+  reloadButton.addEventListener("click", () => location.reload());
+  container.appendChild(reloadButton);
+}
+
+function displayHours(hours) {
+  return `${hours} ${hours > 1 ? "heures" : "heure"}`;
+}
+
+function getWeatherImage(code) {
+  const sunny = [0, 1, 2];
+  const cloudy = [3, 4, 5, 6, 7];
+  const rain = [10, 11, 12, 13, 14, 15, 16, 40, 41, 42, 43, 44, 45, 46, 47, 48, 210, 211, 212];
+  const snow = [20, 21, 22, 60, 61, 62, 63, 64, 65, 220, 221, 222];
+  const storm = [100, 101, 102, 103, 104, 105];
+
+  if (sunny.includes(code)) return "./images/soleil.png";
+  if (cloudy.includes(code)) return "./images/couvert.png";
+  if (rain.includes(code)) return "./images/pluie.png";
+  if (snow.includes(code)) return "./images/neige.png";
+  if (storm.includes(code)) return "./images/orage.png";
+
+  return "./images/inconnu.png";
+}
