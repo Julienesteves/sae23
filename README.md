@@ -22,8 +22,11 @@ Cette application web permet aux utilisateurs de rechercher des prévisions mét
 ## Structure du projet
 
 /index.html → Page principale
+
 /style.css → Feuille de style CSS
+
 /script.js →  Script JS pour les appels API et l'interaction
+
 /README.md → Fichier explicatif du projet
 
 ## Mode d’emploi
