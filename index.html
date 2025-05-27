@@ -1,115 +1,93 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Application de prévisions météorologiques par code postal">
   <link rel="shortcut icon" href="./favicon.png" type="image/x-icon">
-  <link rel="stylesheet" href="./style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
-    rel="stylesheet"
-  />
-  <script
-    src="https://kit.fontawesome.com/0acb75a9e8.js"
-    crossorigin="anonymous"
-  ></script>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/0acb75a9e8.js" crossorigin="anonymous"></script>
   <script defer src="./weatherCard.js"></script>
   <script defer src="./app.js"></script>
   <title>Instant Weather - Prévisions météorologiques</title>
 </head>
 <body>
-  <header role="banner">
-    <h1>INSTANT WEATHER</h1>
-    <p>Votre météo en un clic</p>
-    <p>Choisissez votre commune et consultez les prévisions du jour</p>
+  <!-- En-tête avec titre et bouton dark mode -->
+  <header>
+    <div class="header-container">
+      <div>
+        <h1>INSTANT WEATHER</h1>
+        <p>Votre météo en un clic</p>
+        <p>Choisissez votre commune et consultez les prévisions du jour</p>
+      </div>
+      <button id="darkModeToggle">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
   </header>
-  <main role="main">
-    <section id="cityForm" aria-labelledby="formTitle">
-      <h2 id="formTitle" class="sr-only">Formulaire de recherche météo</h2>
-      <form id="cityForm_form">
+
+  <main>
+    <!-- Formulaire de recherche météo -->
+    <section id="cityForm">
+      <form>
         <div class="form-group">
           <label for="code-postal">Saisissez un code postal (5 chiffres)</label>
-          <input
-            type="text"
-            id="code-postal"
-            placeholder="Exemple : 75001"
-            pattern="\d{5}"
-            maxlength="5"
-            required
-            aria-required="true"
-          />
+          <input type="text" id="code-postal" placeholder="Exemple : 75001" maxlength="5" required>
         </div>
 
         <div class="form-group">
           <label for="communeSelect">Sélectionnez votre commune</label>
-          <select id="communeSelect" aria-label="Liste des communes disponibles" >
-          </select>
+          <select id="communeSelect"></select>
         </div>
 
         <div class="form-group">
           <label for="daysRange">
-            Nombre de jours à afficher (1 à 7) : <span id="daysValue" aria-live="polite">1</span> jour(s)
+            Nombre de jours à afficher (1 à 7) : <span id="daysValue">1</span> jour(s)
           </label>
-          <input 
-            type="range" 
-            id="daysRange" 
-            name="daysRange" 
-            min="1" 
-            max="7" 
-            value="1" 
-            aria-valuetext="1 jour"
-          />
+          <input type="range" id="daysRange" min="1" max="7" value="1">
         </div>
 
-        <fieldset aria-labelledby="optionsLegend">
-          <legend id="optionsLegend">Options supplémentaires</legend>
+        <!-- Options supplémentaires -->
+        <fieldset>
+          <legend>Options supplémentaires</legend>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Latitude" name="options">
+            <input type="checkbox" id="Latitude">
             <label for="Latitude">Latitude</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Longitude" name="options">
+            <input type="checkbox" id="Longitude">
             <label for="Longitude">Longitude</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Cumul de Pluie" name="options">
-            <label for="CumulPluie">Cumul de pluie (mm)</label>
+            <input type="checkbox" id="Cumul de Pluie">
+            <label for="Cumul de Pluie">Cumul de pluie (mm)</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Vent Moyen" name="options">
-            <label for="VentMoyen">Vent moyen (km/h)</label>
+            <input type="checkbox" id="Vent Moyen">
+            <label for="Vent Moyen">Vent moyen (km/h)</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Direction du Vent" name="options">
-            <label for="DirectionVent">Direction du vent (°)</label>
+            <input type="checkbox" id="Direction du Vent">
+            <label for="Direction du Vent">Direction du vent (°)</label>
           </div>
         </fieldset>
 
-        <button 
-          id="validationButton" 
-          type="button"
-          aria-disabled="true"
-          class="disabled"
-        >
+        <button id="validationButton" type="button" class="disabled">
           Valider et afficher la météo
         </button>
       </form>
     </section>
 
-    <section id="weatherInformation" aria-labelledby="weatherTitle" hidden>
-      <h2 id="weatherTitle" class="sr-only">Prévisions météorologiques</h2>
-      <!-- Les informations météo seront injectées ici par JavaScript -->
-    </section>
+    <!-- Zone d'affichage des résultats météo -->
+    <section id="weatherInformation" hidden></section>
   </main>
-
- 
 </body>
 </html>

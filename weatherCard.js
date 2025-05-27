@@ -1,21 +1,18 @@
+// Création de la carte météo principale
 function createCard(data, options = {}) {
   const weatherSection = document.getElementById("weatherInformation");
   const requestSection = document.getElementById("cityForm");
   weatherSection.innerHTML = "";
 
   const weatherContainer = document.createElement("div");
-  weatherContainer.classList.add("force-white", "weather-container");
+  weatherContainer.classList.add("weather-container");
 
+  // Génération d'une carte par jour de prévision
   data.forecasts.forEach((forecast, index) => {
-    const code = forecast.weather;
-
     const dayCard = document.createElement("div");
     dayCard.classList.add("weather-card");
 
-    // Colonne gauche : icône météo + jour
-    const leftCol = createLeftCol(code, index);
-
-    // Colonne droite : données météo
+    const leftCol = createLeftCol(forecast.weather, index);
     const rightCol = createRightCol(forecast, data.city, options);
 
     dayCard.append(leftCol, rightCol);
@@ -29,12 +26,13 @@ function createCard(data, options = {}) {
   weatherSection.style.display = "block";
 }
 
-function createLeftCol(code, index) {
+// Colonne gauche : icône météo + numéro du jour
+function createLeftCol(weatherCode, index) {
   const leftCol = document.createElement("div");
   leftCol.classList.add("card-left");
 
   const icon = document.createElement("img");
-  icon.src = getWeatherImage(code);
+  icon.src = getWeatherImage(weatherCode);
   icon.alt = "Météo";
   icon.classList.add("weather-icon");
 
@@ -46,17 +44,20 @@ function createLeftCol(code, index) {
   return leftCol;
 }
 
+// Colonne droite : données météo détaillées
 function createRightCol(forecast, city, options) {
   const rightCol = document.createElement("div");
   rightCol.classList.add("card-right");
 
+  // Données de base toujours affichées
   const infoList = [
     { label: "Température min", value: `${forecast.tmin}°C` },
     { label: "Température max", value: `${forecast.tmax}°C` },
     { label: "Pluie (%)", value: `${forecast.probarain}%` },
-    { label: "Ensoleillement", value: displayHours(forecast.sun_hours) },
+    { label: "Ensoleillement", value: `${forecast.sun_hours}h` }
   ];
 
+  // Données optionnelles selon les checkboxes
   if (options.rain) infoList.push({ label: "Cumul de pluie", value: `${forecast.rr10} mm` });
   if (options.wind) infoList.push({ label: "Vent moyen", value: `${forecast.wind10m} km/h` });
   if (options.windDirection) infoList.push({ label: "Direction vent", value: `${forecast.dirwind10m}°` });
@@ -82,30 +83,29 @@ function createRightCol(forecast, city, options) {
   return rightCol;
 }
 
+// Bouton pour relancer une nouvelle recherche
 function addReloadButton(container) {
   const reloadButton = document.createElement("button");
   reloadButton.textContent = "Nouvelle recherche";
-  reloadButton.classList.add("reloadButton");
   reloadButton.addEventListener("click", () => location.reload());
   container.appendChild(reloadButton);
 }
 
-function displayHours(hours) {
-  return `${hours} ${hours > 1 ? "heures" : "heure"}`;
-}
-
+// Association code météo = image correspondante
 function getWeatherImage(code) {
-  const sunny = [0, 1, 2];
-  const cloudy = [3, 4, 5, 6, 7];
-  const rain = [10, 11, 12, 13, 14, 15, 16, 40, 41, 42, 43, 44, 45, 46, 47, 48, 210, 211, 212];
-  const snow = [20, 21, 22, 60, 61, 62, 63, 64, 65, 220, 221, 222];
-  const storm = [100, 101, 102, 103, 104, 105];
+  const weatherTypes = {
+    sunny: [0, 1, 2],
+    cloudy: [3, 4, 5, 6, 7],
+    rain: [10, 11, 12, 13, 14, 15, 16, 40, 41, 42, 43, 44, 45, 46, 47, 48, 210, 211, 212],
+    snow: [20, 21, 22, 60, 61, 62, 63, 64, 65, 220, 221, 222],
+    storm: [100, 101, 102, 103, 104, 105]
+  };
 
-  if (sunny.includes(code)) return "./images/soleil.png";
-  if (cloudy.includes(code)) return "./images/couvert.png";
-  if (rain.includes(code)) return "./images/pluie.png";
-  if (snow.includes(code)) return "./images/neige.png";
-  if (storm.includes(code)) return "./images/orage.png";
+  if (weatherTypes.sunny.includes(code)) return "./images/soleil.png";
+  if (weatherTypes.cloudy.includes(code)) return "./images/couvert.png";
+  if (weatherTypes.rain.includes(code)) return "./images/pluie.png";
+  if (weatherTypes.snow.includes(code)) return "./images/neige.png";
+  if (weatherTypes.storm.includes(code)) return "./images/orage.png";
 
   return "./images/inconnu.png";
 }

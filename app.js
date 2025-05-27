@@ -1,62 +1,63 @@
-// Sélection des éléments
+// Sélection des éléments essentiels
 const codePostalInput = document.getElementById("code-postal");
 const communeSelect = document.getElementById("communeSelect");
 const validationButton = document.getElementById("validationButton");
 const daysRange = document.getElementById("daysRange");
 const daysValue = document.getElementById("daysValue");
+const darkModeToggle = document.getElementById("darkModeToggle");
 
-// Fonction pour récupérer les communes par code postal
+// Gestion du dark mode
+function toggleDarkMode() {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  
+  const icon = darkModeToggle.querySelector('i');
+  icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+// Initialisation du thème au chargement
+function checkTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  
+  const icon = darkModeToggle.querySelector('i');
+  icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+
+darkModeToggle.addEventListener('click', toggleDarkMode);
+document.addEventListener('DOMContentLoaded', checkTheme);
+
+// API communes
 async function fetchCommunesByCodePostal(codePostal) {
-  try {
-    const response = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${codePostal}`);
-    if (!response.ok) throw new Error("Erreur réseau");
-    return await response.json();
-  } catch (error) {
-    console.error("Erreur API communes:", error);
-    throw error;
-  }
+  const response = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${codePostal}`);
+  if (!response.ok) throw new Error("Erreur réseau");
+  return await response.json();
 }
 
-// Fonction pour récupérer les données météo
+// API météo
 async function fetchMeteoByCommune(selectedCommune, numberOfDays = 1) {
-  try {
-    const response = await fetch(
-      `https://api.meteo-concept.com/api/forecast/daily?token=40cb912aff2f7792bb9ecd409d50ed4e2dca5e462e8e7ae2643237298e6198be&insee=${selectedCommune}`
-    );
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
-    }
+  const response = await fetch(
+    `https://api.meteo-concept.com/api/forecast/daily?token=40cb912aff2f7792bb9ecd409d50ed4e2dca5e462e8e7ae2643237298e6198be&insee=${selectedCommune}`
+  );
+  if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
 
-    const data = await response.json();
-    console.log("Réponse API Météo:", data);
+  const data = await response.json();
+  const forecasts = data.forecasts || data.forecast;
+  
+  if (!forecasts) throw new Error("Aucune donnée météo trouvée");
 
-    const forecasts = data.forecasts || data.forecast;
-
-    if (!forecasts) {
-      throw new Error("Aucune donnée météo trouvée dans la réponse");
-    }
-
-    return {
-      ...data,
-      forecasts: forecasts.slice(0, numberOfDays)
-    };
-
-  } catch (error) {
-    console.error("Erreur fetchMeteoByCommune:", error);
-    throw error;
-  }
+  return {
+    ...data,
+    forecasts: forecasts.slice(0, numberOfDays)
+  };
 }
 
-// Afficher les communes dans le select
+// Affichage des communes
 function displayCommunes(communes) {
-  communeSelect.innerHTML = "";
-
-  const defaultOption = document.createElement('option');
-  defaultOption.value = "";
-  defaultOption.textContent = "-- Sélectionnez une commune --";
-  defaultOption.selected = true;
-  defaultOption.disabled = true;
-  communeSelect.appendChild(defaultOption);
+  communeSelect.innerHTML = '<option value="" selected disabled>-- Sélectionnez une commune --</option>';
 
   if (communes.length === 0) {
     showErrorMessage("Aucune commune trouvée pour ce code postal");
@@ -72,12 +73,11 @@ function displayCommunes(communes) {
     communeSelect.appendChild(option);
   });
 
-  // Activer le bouton de validation
   validationButton.disabled = false;
   validationButton.classList.remove('disabled');
 }
 
-// Affichage du message d'erreur
+// Gestion des erreurs
 function showErrorMessage(message) {
   const existingMessage = document.getElementById("error-message");
   if (existingMessage) existingMessage.remove();
@@ -89,7 +89,7 @@ function showErrorMessage(message) {
   codePostalInput.insertAdjacentElement('afterend', errorMessage);
 }
 
-// Événement : saisie du code postal
+// Validation du code postal et recherche des communes
 codePostalInput.addEventListener("input", async () => {
   const codePostal = codePostalInput.value.trim();
 
@@ -112,10 +112,10 @@ codePostalInput.addEventListener("input", async () => {
   }
 });
 
-// Événement : clic sur le bouton de validation
+// Validation finale et récupération météo
 validationButton.addEventListener("click", async () => {
   const selectedCommune = communeSelect.value;
-  if (!selectedCommune || selectedCommune === "") {
+  if (!selectedCommune) {
     showErrorMessage("Veuillez sélectionner une commune");
     return;
   }
@@ -137,8 +137,7 @@ validationButton.addEventListener("click", async () => {
   }
 });
 
-// Événement : modification du nombre de jours
+// Mise à jour de l'affichage du nombre de jours
 daysRange.addEventListener("input", () => {
   daysValue.textContent = daysRange.value;
-  daysRange.setAttribute('aria-valuetext', `${daysRange.value} jour(s)`);
 });
