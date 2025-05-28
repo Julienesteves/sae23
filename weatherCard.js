@@ -1,3 +1,6 @@
+// Variable globale pour la carte
+let franceMap = null;
+
 // Création de la carte météo principale
 function createCard(data, options = {}) {
   const weatherSection = document.getElementById("weatherInformation");
@@ -7,27 +10,131 @@ function createCard(data, options = {}) {
   const weatherContainer = document.createElement("div");
   weatherContainer.classList.add("weather-container");
 
+  // Conteneur pour les cartes météo
+  const weatherCards = document.createElement("div");
+  weatherCards.classList.add("weather-cards");
+
   // Génération d'une carte par jour de prévision
   data.forecasts.forEach((forecast, index) => {
     const dayCard = document.createElement("div");
     dayCard.classList.add("weather-card");
 
-    const leftCol = createLeftCol(forecast.weather, index);
+    const leftCol = createLeftCol(forecast.weather, forecast.datetime, index);
     const rightCol = createRightCol(forecast, data.city, options);
 
     dayCard.append(leftCol, rightCol);
-    weatherContainer.appendChild(dayCard);
+    weatherCards.appendChild(dayCard);
   });
 
+  // Création de la carte de France
+  const mapContainer = createMapContainer(data.city);
+
+  weatherContainer.appendChild(weatherCards);
+  weatherContainer.appendChild(mapContainer);
   weatherSection.appendChild(weatherContainer);
+  
   addReloadButton(weatherSection);
   
   requestSection.style.display = "none";
   weatherSection.style.display = "block";
+
+  // Initialiser la carte après un court délai
+  setTimeout(() => initializeFranceMap(data.city), 100);
 }
 
-// Colonne gauche : icône météo + numéro du jour
-function createLeftCol(weatherCode, index) {
+// Création du conteneur de carte
+function createMapContainer(city) {
+  const mapContainer = document.createElement("div");
+  mapContainer.classList.add("map-container");
+
+  const mapHeader = document.createElement("div");
+  mapHeader.classList.add("map-header");
+  mapHeader.innerHTML = '<i class="fas fa-map-marker-alt"></i> Localisation';
+
+  const mapElement = document.createElement("div");
+  mapElement.id = "franceMap";
+
+  const mapInfo = document.createElement("div");
+  mapInfo.classList.add("map-info");
+  
+  const title = document.createElement("h4");
+  title.textContent = city.name;
+  
+  const coords = document.createElement("p");
+  coords.innerHTML = `<strong>Coordonnées :</strong><br>Lat: ${city.latitude}° | Lon: ${city.longitude}°`;
+
+  mapInfo.appendChild(title);
+  mapInfo.appendChild(coords);
+
+  mapContainer.appendChild(mapHeader);
+  mapContainer.appendChild(mapElement);
+  mapContainer.appendChild(mapInfo);
+
+  return mapContainer;
+}
+
+// Initialisation de la carte de France
+function initializeFranceMap(city) {
+  if (franceMap) {
+    franceMap.remove();
+  }
+
+  const lat = parseFloat(city.latitude);
+  const lon = parseFloat(city.longitude);
+
+  // Créer la carte centrée sur la France
+  franceMap = L.map('franceMap').setView([46.603354, 1.888334], 6);
+
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const tileLayer = currentTheme === 'dark' 
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  L.tileLayer(tileLayer, {
+    attribution: currentTheme === 'dark' 
+      ? '&copy; <a href="https://carto.com/attributions">CARTO</a>' 
+      : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(franceMap);
+
+  // Ajouter le marqueur rouge pour la ville
+  const redIcon = L.divIcon({
+    className: 'custom-red-marker',
+    html: '<div style="background-color: #dc3545; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>',
+    iconSize: [12, 12],
+    iconAnchor: [6, 6]
+  });
+
+  L.marker([lat, lon], { icon: redIcon })
+    .addTo(franceMap)
+    .bindPopup(`<strong>${city.name}</strong><br>Lat: ${lat}°<br>Lon: ${lon}°`);
+
+  // Centrer la vue sur la ville avec un zoom approprié
+  franceMap.setView([lat, lon], 8);
+}
+
+// Fonction pour obtenir le nom du jour de la semaine
+function getDayName(dateString, index) {
+  const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  
+  if (index === 0) {
+    return "Aujourd'hui";
+  }
+  
+  if (dateString) {
+    const date = new Date(dateString);
+    return days[date.getDay()];
+  }
+  
+  const today = new Date();
+  const targetDate = new Date(today);
+  targetDate.setDate(today.getDate() + index);
+  
+  return days[targetDate.getDay()];
+}
+
+// Colonne gauche : icône météo + jour de la semaine
+function createLeftCol(weatherCode, datetime, index) {
   const leftCol = document.createElement("div");
   leftCol.classList.add("card-left");
 
@@ -38,7 +145,7 @@ function createLeftCol(weatherCode, index) {
 
   const day = document.createElement("p");
   day.classList.add("weather-day");
-  day.textContent = `Jour ${index + 1}`;
+  day.textContent = getDayName(datetime, index);
 
   leftCol.append(icon, day);
   return leftCol;
@@ -57,7 +164,7 @@ function createRightCol(forecast, city, options) {
     { label: "Ensoleillement", value: `${forecast.sun_hours}h` }
   ];
 
-  // Données optionnelles selon les checkboxes
+  // Données optionnelles selon les checkboxe
   if (options.rain) infoList.push({ label: "Cumul de pluie", value: `${forecast.rr10} mm` });
   if (options.wind) infoList.push({ label: "Vent moyen", value: `${forecast.wind10m} km/h` });
   if (options.windDirection) infoList.push({ label: "Direction vent", value: `${forecast.dirwind10m}°` });
@@ -83,10 +190,10 @@ function createRightCol(forecast, city, options) {
   return rightCol;
 }
 
-// Bouton pour relancer une nouvelle recherche
+// Bouton pour relancé une nouvelle recherche
 function addReloadButton(container) {
   const reloadButton = document.createElement("button");
-  reloadButton.textContent = "Nouvelle recherche";
+  reloadButton.innerHTML = '<i class="fas fa-redo"></i> Nouvelle recherche';
   reloadButton.addEventListener("click", () => location.reload());
   container.appendChild(reloadButton);
 }
