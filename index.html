@@ -6,16 +6,15 @@
   <meta name="description" content="Application de prévisions météorologiques par code postal">
   <link rel="shortcut icon" href="./favicon.png" type="image/x-icon">
   <link rel="stylesheet" href="./style.css">
-  <!-- Ajout de Leaflet pour la carte -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/0acb75a9e8.js" crossorigin="anonymous"></script>
-  <!-- Script Leaflet pour la carte -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script defer src="./weatherCard.js"></script>
   <script defer src="./app.js"></script>
+
   <title>Instant Weather - Prévisions météorologiques</title>
 </head>
 <body>
@@ -27,8 +26,8 @@
         <p>Votre météo en un clic</p>
         <p>Choisissez votre commune et consultez les prévisions du jour</p>
       </div>
-      <button id="darkModeToggle">
-        <i class="fas fa-moon"></i>
+      <button id="darkModeToggle" aria-label="Activer le mode sombre">
+        <span class="fas fa-moon" aria-hidden="true"></span>
       </button>
     </div>
   </header>
@@ -36,22 +35,22 @@
   <main>
     <!-- Formulaire de recherche météo -->
     <section id="cityForm">
-      <form>
+      <form name="weatherForm" novalidate>
         <div class="form-group">
           <label for="code-postal">Saisissez un code postal (5 chiffres)</label>
-          <input type="text" id="code-postal" placeholder="Exemple : 75001" maxlength="5" required>
+          <input type="text" id="code-postal" name="code-postal" placeholder="Exemple : 75001" maxlength="5" required pattern="\d{5}">
         </div>
 
         <div class="form-group">
           <label for="communeSelect">Sélectionnez votre commune</label>
-          <select id="communeSelect"></select>
+          <select id="communeSelect" name="commune"></select>
         </div>
 
         <div class="form-group">
           <label for="daysRange">
             Nombre de jours à afficher (1 à 7) : <span id="daysValue">1</span> jour(s)
           </label>
-          <input type="range" id="daysRange" min="1" max="7" value="1">
+          <input type="range" id="daysRange" name="days" min="1" max="7" value="1">
         </div>
 
         <!-- Options supplémentaires -->
@@ -59,28 +58,28 @@
           <legend>Options supplémentaires</legend>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Latitude">
-            <label for="Latitude">Latitude</label>
+            <input type="checkbox" id="latitude" name="latitude">
+            <label for="latitude">Latitude</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Longitude">
-            <label for="Longitude">Longitude</label>
+            <input type="checkbox" id="longitude" name="longitude">
+            <label for="longitude">Longitude</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Cumul de Pluie">
-            <label for="Cumul de Pluie">Cumul de pluie (mm)</label>
+            <input type="checkbox" id="cumul-pluie" name="cumul_pluie">
+            <label for="cumul-pluie">Cumul de pluie (mm)</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Vent Moyen">
-            <label for="Vent Moyen">Vent moyen (km/h)</label>
+            <input type="checkbox" id="vent-moyen" name="vent_moyen">
+            <label for="vent-moyen">Vent moyen (km/h)</label>
           </div>
           
           <div class="checkbox-group">
-            <input type="checkbox" id="Direction du Vent">
-            <label for="Direction du Vent">Direction du vent (°)</label>
+            <input type="checkbox" id="direction-vent" name="direction_vent">
+            <label for="direction-vent">Direction du vent (°)</label>
           </div>
         </fieldset>
 

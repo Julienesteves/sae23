@@ -1,4 +1,3 @@
-// Sélection des éléments essentiels
 const codePostalInput = document.getElementById("code-postal");
 const communeSelect = document.getElementById("communeSelect");
 const validationButton = document.getElementById("validationButton");
@@ -10,19 +9,17 @@ const darkModeToggle = document.getElementById("darkModeToggle");
 function toggleDarkMode() {
   const currentTheme = document.documentElement.getAttribute('data-theme');
   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  
   document.documentElement.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
-  
+
   const icon = darkModeToggle.querySelector('i');
   icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// Initialisation du thème au chargement
 function checkTheme() {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
-  
+
   const icon = darkModeToggle.querySelector('i');
   icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 }
@@ -30,14 +27,12 @@ function checkTheme() {
 darkModeToggle.addEventListener('click', toggleDarkMode);
 document.addEventListener('DOMContentLoaded', checkTheme);
 
-// API communes
 async function fetchCommunesByCodePostal(codePostal) {
   const response = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${codePostal}`);
   if (!response.ok) throw new Error("Erreur réseau");
   return await response.json();
 }
 
-// API météo
 async function fetchMeteoByCommune(selectedCommune, numberOfDays = 1) {
   const response = await fetch(
     `https://api.meteo-concept.com/api/forecast/daily?token=40cb912aff2f7792bb9ecd409d50ed4e2dca5e462e8e7ae2643237298e6198be&insee=${selectedCommune}`
@@ -46,7 +41,7 @@ async function fetchMeteoByCommune(selectedCommune, numberOfDays = 1) {
 
   const data = await response.json();
   const forecasts = data.forecasts || data.forecast;
-  
+
   if (!forecasts) throw new Error("Aucune donnée météo trouvée");
 
   return {
@@ -55,7 +50,6 @@ async function fetchMeteoByCommune(selectedCommune, numberOfDays = 1) {
   };
 }
 
-// Affichage des communes
 function displayCommunes(communes) {
   communeSelect.innerHTML = '<option value="" selected disabled>-- Sélectionnez une commune --</option>';
 
@@ -77,7 +71,6 @@ function displayCommunes(communes) {
   validationButton.classList.remove('disabled');
 }
 
-// Gestion des erreurs
 function showErrorMessage(message) {
   const existingMessage = document.getElementById("error-message");
   if (existingMessage) existingMessage.remove();
@@ -89,7 +82,6 @@ function showErrorMessage(message) {
   codePostalInput.insertAdjacentElement('afterend', errorMessage);
 }
 
-// Validation du code postal et recherche des communes
 codePostalInput.addEventListener("input", async () => {
   const codePostal = codePostalInput.value.trim();
 
@@ -112,7 +104,6 @@ codePostalInput.addEventListener("input", async () => {
   }
 });
 
-// Validation finale et récupération météo
 validationButton.addEventListener("click", async () => {
   const selectedCommune = communeSelect.value;
   if (!selectedCommune) {
@@ -123,11 +114,11 @@ validationButton.addEventListener("click", async () => {
   try {
     const numberOfDays = parseInt(daysRange.value) || 1;
     const options = {
-      latitude: document.getElementById("Latitude").checked,
-      longitude: document.getElementById("Longitude").checked,
-      rain: document.getElementById("Cumul de Pluie").checked,
-      wind: document.getElementById("Vent Moyen").checked,
-      windDirection: document.getElementById("Direction du Vent").checked
+      latitude: document.getElementById("latitude").checked,
+      longitude: document.getElementById("longitude").checked,
+      rain: document.getElementById("cumul-pluie").checked,
+      wind: document.getElementById("vent-moyen").checked,
+      windDirection: document.getElementById("direction-vent").checked
     };
 
     const meteoData = await fetchMeteoByCommune(selectedCommune, numberOfDays);
@@ -137,7 +128,6 @@ validationButton.addEventListener("click", async () => {
   }
 });
 
-// Mise à jour de l'affichage du nombre de jours
 daysRange.addEventListener("input", () => {
   daysValue.textContent = daysRange.value;
 });
